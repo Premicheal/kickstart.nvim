@@ -40,19 +40,22 @@ P.S. You can delete this when you're done too. It's your config now :)
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
+vim.g.python3_host_prog = vim.env.HOME .. '/.local/venv/nvim/bin/python'
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
+vim.keymap.set('v', '<C-p>', "<cmd>NvimTreeToggle<CR>")
+vim.keymap.set('n', '<C-p>', "<cmd>NvimTreeToggle<CR>")
 vim.keymap.set('n', '<C-w>z', "<cmd>WindowsMaximize<CR>")
 vim.keymap.set('n', '<C-w>_', "<cmd>WindowsMaximizeVertically<CR>")
 vim.keymap.set('n', '<C-w>|', "<cmd>WindowsMaximizeHorizontally<CR>")
 vim.keymap.set('n', '<C-w>=', "<cmd>WindowsEqualize<CR>")
 vim.keymap.set("n", "]q", "<cmd>cnext<CR>")
 vim.keymap.set("n", "[q", "<cmd>cprev<CR>")
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+-- vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+-- vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 -- vim.keymap.set({ 'n', 't' }, '<C-h>', '<CMD>NavigatorLeft<CR>')
 -- vim.keymap.set({ 'n', 't' }, '<C-l>', '<CMD>NavigatorRight<CR>')
@@ -65,7 +68,7 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 --vim.keymap.set("n", "<C-f>", "<C-f>zz")
 --vim.keymap.set("n", "<C-u>", "<C-u>zz")
 --vim.keymap.set("n", "n", "nzzzv")
-vim.opt.scrolloff = 999
+vim.opt.scrolloff = 9
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 --vim.keymap.set("n", "N", "Nzzzv")
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -161,24 +164,42 @@ require('lazy').setup({
     config = true
   },
   {
-    'xiyaowong/transparent.nvim',
-    config = function()
-      require("transparent").setup({ -- Optional, you don't have to run setup.
-        groups = {                   -- table: default groups
-          'Normal', 'NormalNC', 'Comment', 'Constant', 'Special', 'Identifier',
-          'Statement', 'PreProc', 'Type', 'Underlined', 'Todo', 'String', 'Function',
-          'Conditional', 'Repeat', 'Operator', 'Structure', 'LineNr', 'NonText',
-          'SignColumn', 'CursorLine', 'CursorLineNr', 'StatusLine', 'StatusLineNC',
-          'EndOfBuffer',
-        },
-        extra_groups = {
-          "NormalFloat",     -- plugins which have float panel such as Lazy, Mason, LspInfo
-          "NvimTreeNormal"   -- NvimTree
-        },
-        exclude_groups = {}, -- table: groups you don't want to clear
-      })
-    end
+    "mxsdev/nvim-dap-vscode-js",
   },
+  {
+    'Joakker/lua-json5',
+    build = './install.sh'
+  },
+  {
+    "kevinhwang91/nvim-hlslens",
+    config = function()
+      -- require('hlslens').setup() is not required
+      require("scrollbar.handlers.search").setup({
+        -- hlslens config overrides
+      })
+    end,
+  },
+  {
+    'petertriho/nvim-scrollbar',
+  }, {
+  'xiyaowong/transparent.nvim',
+  config = function()
+    require("transparent").setup({ -- Optional, you don't have to run setup.
+      groups = {                   -- table: default groups
+        'Normal', 'NormalNC', 'Comment', 'Constant', 'Special', 'Identifier',
+        'Statement', 'PreProc', 'Type', 'Underlined', 'Todo', 'String', 'Function',
+        'Conditional', 'Repeat', 'Operator', 'Structure', 'LineNr', 'NonText',
+        'SignColumn', 'CursorLine', 'CursorLineNr', 'StatusLine', 'StatusLineNC',
+        'EndOfBuffer',
+      },
+      extra_groups = {
+        "NormalFloat",     -- plugins which have float panel such as Lazy, Mason, LspInfo
+        "NvimTreeNormal"   -- NvimTree
+      },
+      exclude_groups = {}, -- table: groups you don't want to clear
+    })
+  end
+},
   'nvim-treesitter/nvim-treesitter-context',
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
@@ -197,28 +218,10 @@ require('lazy').setup({
       "anuvyklack/animation.nvim"
     },
     config = function()
-      local other_config = {
-        autowidth = {
-          enable = true, -- false
-          winwidth = 5,
-          filetype = {
-            help = 2,
-          },
-        },
-        ignore = {
-          buftype = { 'quickfix' },
-          filetype = {
-            'undotree'
-          }
-        },
-        animation = {
-          enable = true,
-          duration = 100,
-          fps = 90,
-          easing = 'in_out_sine' ---@diagnostic disable-line
-        }
-      }
-      require('windows').setup(other_config)
+      vim.o.winwidth = 10
+      vim.o.winminwidth = 10
+      vim.o.equalalways = false
+      require('windows').setup()
     end
   },
   {
@@ -274,6 +277,23 @@ require('lazy').setup({
     'HiPhish/rainbow-delimiters.nvim',
   },
   {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    opts = {
+      -- add any options here
+    },
+    dependencies = {
+      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+      "MunifTanjim/nui.nvim",
+      -- OPTIONAL:
+      --   `nvim-notify` is only needed, if you want to use the notification view.
+      --   If not available, we use `mini` as the fallback
+      "rcarriga/nvim-notify",
+    }
+  },
+
+
+  {
     "nvim-tree/nvim-tree.lua",
     version = "*",
     lazy = false,
@@ -283,24 +303,59 @@ require('lazy').setup({
     config = function()
       require("nvim-tree").setup {
         filters = {
-          dotfiles = false,
+          dotfiles = true,
           git_ignored = false,
-        }, view = { adaptive_size = true, relativenumber = true } }
+        }, view = { adaptive_size = true, relativenumber = true }, update_focused_file = {
+        enable = true,
+      } }
     end,
   },
-  -- USEFUL PLUGIN TO SHOW YOU PENDING KEYBINDS.
-  { 'FOLKE/WHICH-KEY.NVIM', OPTS = {} },
+  -- useful plugin to show you pending keybinds.
+  { 'folke/which-key.nvim', opts = {} },
   {
-    -- ADDS GIT RELATED SIGNS TO THE GUTTER, AS WELL AS UTILITIES FOR MANAGING CHANGES
-    'LEWIS6991/GITSIGNS.NVIM',
-    OPTS = {
-      -- SEE `:HELP GITSIGNS.TXT`
-      SIGNS = {
-        ADD = { TEXT = '+' },
-        CHANGE = { TEXT = '~' },
-        DELETE = { TEXT = '_' },
-        TOPDELETE = { TEXT = '‾' },
-        CHANGEDELETE = { TEXT = '~' },
+    -- adds git related signs to the gutter, as well as utilities for managing changes
+    'lewis6991/gitsigns.nvim',
+    opts = {
+      -- see `:help gitsigns.txt`
+      signs = {
+        add          = { text = '│' },
+        change       = { text = '│' },
+        delete       = { text = '_' },
+        topdelete    = { text = '‾' },
+        changedelete = { text = '~' },
+        untracked    = { text = '┆' },
+      },
+      signcolumn = false, -- Toggle with `:Gitsigns toggle_signs`
+      numhl = true,       -- Toggle with `:Gitsigns toggle_numhl`
+      linehl = false,     -- Toggle with `:Gitsigns toggle_linehl`
+      word_diff = false,  -- Toggle with `:Gitsigns toggle_word_diff`
+      watch_gitdir = {
+        follow_files = true
+      },
+      attach_to_untracked = false,
+      current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+        delay = 1000,
+        ignore_whitespace = false,
+        virt_text_priority = 100,
+      },
+      current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+      sign_priority = 6,
+      update_debounce = 100,
+      status_formatter = nil,  -- Use default
+      max_file_length = 40000, -- Disable if file is longer than this (in lines)
+      preview_config = {
+        -- Options passed to nvim_open_win
+        border = 'single',
+        style = 'minimal',
+        relative = 'cursor',
+        row = 0,
+        col = 1
+      },
+      yadm = {
+        enable = false
       },
       on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
@@ -410,6 +465,7 @@ require('lazy').setup({
     },
   },
 
+  { 'averms/black-nvim' },
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -430,8 +486,26 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
 
+  require "kickstart.plugins.debug"
 }, {})
-
+require("noice").setup({
+  lsp = {
+    -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+    override = {
+      ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+      ["vim.lsp.util.stylize_markdown"] = true,
+      ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+    },
+  },
+  -- you can enable a preset for easier configuration
+  presets = {
+    bottom_search = true,         -- use a classic bottom cmdline for search
+    command_palette = true,       -- position the cmdline and popupmenu together
+    long_message_to_split = true, -- long messages will be sent to a split
+    inc_rename = true,            -- enables an input dialog for inc-rename.nvim
+    lsp_doc_border = true,        -- add a border to hover docs and signature help
+  },
+})
 require('lualine').setup {
   options = {
     icons_enabled = true,
@@ -458,7 +532,6 @@ local rainbow_delimiters = require 'rainbow-delimiters'
 
 -- Set tmux_navigator_no_wrap to 1
 vim.g.tmux_navigator_no_wrap = 1
----@type rainbow_delimiters.config
 vim.g.rainbow_delimiters = {
   strategy = {
     [''] = rainbow_delimiters.strategy['global'],
@@ -499,7 +572,9 @@ vim.opt.relativenumber = true
 vim.opt.cursorline = true
 vim.opt.swapfile = false
 vim.opt.list = true
-vim.opt.wrap = true
+vim.opt.smartindent = true
+vim.opt.autoindent = true
+vim.opt.wrap = false
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.backup = false
@@ -524,7 +599,7 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- Keep signcolumn on by default
-vim.wo.signcolumn = 'yes'
+vim.wo.signcolumn = 'no'
 
 -- Decrease update time
 vim.o.updatetime = 50
@@ -546,11 +621,10 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 -- vim.keymap.set({ 'n', 'v' }, '<leader>gg', ":LazyGit\n", { silent = true })
-vim.keymap.set({ 'n', 'v' }, "<leader>gg", ":!tmux new-window -c " .. vim.fn.getcwd() .. " -- lazygit <CR><CR>",
-  { silent = true })
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
+vim.keymap.set("n", "<C-q>", "<cmd>call Black()<CR>")
 -- vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-essionizer<CR>")
 vim.keymap.set("n", "<leader>r", vim.lsp.buf.format)
 -- Diagnostic keymaps
@@ -566,6 +640,13 @@ vim.api.nvim_set_keymap(
 )
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
+-- local uv = vim.loop
+--
+-- vim.api.nvim_create_autocmd('VimEnter', {
+-- 	callback = function()
+-- 			uv.spawn('/Users/prasshan/.tmux/plugins/tmux-window-name/scripts/rename_session_windows.py', {})
+-- 	end,
+-- })
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
@@ -589,6 +670,80 @@ vim.api.nvim_create_autocmd({ "BufEnter" }, {
 --
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
+local js_based_languages = { "typescript", "javascript", "typescriptreact" }
+
+for _, language in ipairs(js_based_languages) do
+  require("dap").configurations[language] = {
+    {
+      type = "pwa-node",
+      request = "launch",
+      name = "Launch file",
+      program = "${file}",
+      cwd = "${workspaceFolder}",
+    },
+    {
+      type = "pwa-node",
+      request = "attach",
+      name = "NestJs",
+      program = "nodemon",
+      cwd = "${workspaceFolder}",
+    },
+    {
+      type = "pwa-node",
+      request = "attach",
+      name = "NestJs",
+      program = "npm run debug:dev",
+      cwd = "${workspaceFolder}",
+    },
+    {
+      type = "pwa-node",
+      request = "attach",
+      name = "Attach",
+      processId = require 'dap.utils'.pick_process,
+      cwd = "${workspaceFolder}",
+    },
+    {
+      type = "pwa-chrome",
+      request = "launch",
+      name = "Start Chrome with \"localhost\"",
+      url = "http://localhost:3000",
+      webRoot = "${workspaceFolder}",
+      userDataDir = "${workspaceFolder}/.vscode/vscode-chrome-debug-userdatadir"
+    }
+  }
+end
+require("dap-vscode-js").setup({
+  -- Required: Specify the path of the node executable. Defaults usually to $NODE_PATH, or "node"
+  node_path = "node", -- Adjust as necessary to the path of your Node.js executable
+
+  -- Required: Path to the vscode-js-debug installation
+  debugger_path = vim.fn.stdpath('data') .. "/lazy/vscode-js-debug",
+
+  -- Required: Command to use to launch the debug server. Defaults might be overridden here.
+  debugger_cmd = { vim.fn.stdpath('data') .. "/lazy/vscode-js-debug/extension/dist/debug.js" },
+
+  -- Adapters to register in nvim-dap
+  adapters = {
+    'chrome', 'pwa-node', 'pwa-chrome', 'pwa-msedge', 'node-terminal',
+    'pwa-extensionHost', 'node'
+  },
+
+  -- Required: Path for file logging
+  log_file_path = vim.fn.stdpath('data') .. "/dap_vscode_js.log",
+
+  -- Required: Logging level for output to file. Set to false to disable file logging.
+  log_file_level = 0,
+
+  -- Required: Logging level for output to console.
+  log_console_level = vim.log.levels.INFO, -- Set to false to disable or choose a specific level
+})
+require("scrollbar.handlers.gitsigns").setup()
+local colors = require("catppuccin.palettes.macchiato")
+require("scrollbar").setup({
+  handle = {
+    color = "black"
+  },
+})
 require('telescope').setup {
   defaults = {
     mappings = {
@@ -673,12 +828,12 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'html', 'markdown', 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-    auto_install = false,
+    auto_install = true,
     -- Install languages synchronously (only applied to `ensure_installed`)
-    sync_install = false,
+    sync_install = true,
     -- List of parsers to ignore installing
     ignore_install = {},
     -- You can specify additional Treesitter modules here: -- For example: -- playground = {--enable = true,-- },
