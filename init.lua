@@ -46,8 +46,8 @@ vim.g.maplocalleader = ' '
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
-vim.keymap.set('v', '<C-p>', "<cmd>NvimTreeToggle<CR>")
-vim.keymap.set('n', '<C-p>', "<cmd>NvimTreeToggle<CR>")
+vim.keymap.set('n', '_', "<cmd>NvimTreeToggle<CR>")
+vim.keymap.set('v', '_', "<cmd>NvimTreeToggle<CR>")
 vim.keymap.set('n', '<C-w>z', "<cmd>WindowsMaximize<CR>")
 vim.keymap.set('n', '<C-w>_', "<cmd>WindowsMaximizeVertically<CR>")
 vim.keymap.set('n', '<C-w>|', "<cmd>WindowsMaximizeHorizontally<CR>")
@@ -522,6 +522,15 @@ require('lualine').setup {
 require 'toggleterm-config'
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
+vim.keymap.set('n', '<leader>m', function()
+  if vim.lsp.inlay_hint then
+    if vim.lsp.inlay_hint() then
+      vim.lsp.inlay_hint(nil, false)
+    else
+      vim.lsp.inlay_hint(nil, true)
+    end
+  end
+end)
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -632,12 +641,59 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+-- Function to move to the right window or the next tab if on the rightmost pane
+local function move_right_or_next_tab()
+  local success, result = pcall(function()
+    local win_pos = vim.fn.win_screenpos(0)
+    local win_width = vim.fn.winwidth(0)
+    local total_width = vim.o.columns
+
+    -- If the current window's right edge is at the screen's right edge
+    if win_pos[2] + win_width - 1 == total_width then
+      vim.cmd("tabnext")
+    else
+      vim.cmd("wincmd l")
+    end
+  end)
+  if not success then
+    print("Error moving to the next tab or right window:", result)
+  end
+end
+
+-- Function to move to the left window or the previous tab if on the leftmost pane
+local function move_left_or_prev_tab()
+  local success, result = pcall(function()
+    local win_pos = vim.fn.win_screenpos(0)
+
+    -- If the current window's left edge is at the screen's left edge
+    if win_pos[2] == 1 then
+      vim.cmd("tabprevious")
+    else
+      vim.cmd("wincmd h")
+    end
+  end)
+  if not success then
+    print("Error moving to the previous tab or left window:", result)
+  end
+end
+vim.api.nvim_create_user_command('MOVERIGHTORNEXTTAB', move_right_or_next_tab, {})
+vim.api.nvim_create_user_command('MOVELEFTORPREVTAB', move_left_or_prev_tab, {})
+
+vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
+-- Map Ctrl+l to the function for moving right or to the next tab
+vim.api.nvim_set_keymap('n', '<C-h>', ':MOVELEFTORPREVTAB<cr>', { noremap = true, silent = true })
+
+-- Map Ctrl+h to the function for moving left or to the previous tab
+vim.api.nvim_set_keymap('n', '<C-l>', ':MOVERIGHTORNEXTTAB<cr>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap(
   "n",
   "<space>fb",
   ":Telescope file_browser path=%:p:h select_buffer=true<CR>",
   { noremap = true }
 )
+vim.api.nvim_set_keymap('n', '<leader>nt', ':tabnew<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>nh', ':nohlsearch<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '//', [[y/\V<C-R>=escape(@",'/\')<CR><CR>]], { noremap = true, silent = true })
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
 -- local uv = vim.loop
@@ -811,6 +867,7 @@ local function telescope_live_grep_open_files()
     prompt_title = 'Live Grep in Open Files',
   }
 end
+-- Visual mode search mapping
 vim.keymap.set('n', '<leader>s/', telescope_live_grep_open_files, { desc = '[S]earch [/] in Open Files' })
 vim.keymap.set('n', '<leader>ss', require('telescope.builtin').builtin, { desc = '[S]earch [S]elect Telescope' })
 vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
@@ -1089,6 +1146,7 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'path' },
+    { name = 'buffer' },
   },
 }
 
