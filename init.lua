@@ -63,8 +63,8 @@ require('lazy').setup({
       { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
     },
   },
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
-  { 'windwp/nvim-autopairs', event = "InsertEnter", config = true },
+  { 'folke/todo-comments.nvim', event = 'VimEnter',    dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { 'windwp/nvim-autopairs',    event = "InsertEnter", config = true },
   {
     'echasnovski/mini.nvim',
     config = function()
@@ -72,9 +72,8 @@ require('lazy').setup({
       require('mini.surround').setup()
     end,
   },
-  { 'akinsho/toggleterm.nvim', version = "*", config = true },
-  { 'mxsdev/nvim-dap-vscode-js' },
-  { 'Joakker/lua-json5', build = './install.sh' },
+  { 'akinsho/toggleterm.nvim',  version = "*",         config = true },
+  { 'Joakker/lua-json5',        build = './install.sh' },
   {
     "kevinhwang91/nvim-hlslens",
     config = function()
@@ -125,14 +124,20 @@ require('lazy').setup({
     dependencies = {
       { 'williamboman/mason.nvim', config = true },
       'williamboman/mason-lspconfig.nvim',
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
       'folke/neodev.nvim',
     },
   },
   {
     'hrsh7th/nvim-cmp',
     dependencies = {
-      { 'L3MON4D3/LuaSnip', build = (function() if vim.fn.has 'win32' == 1 then return end return 'make install_jsregexp' end)() },
+      {
+        'L3MON4D3/LuaSnip',
+        build = (function()
+          if vim.fn.has 'win32' == 1 then return end
+          return 'make install_jsregexp'
+        end)()
+      },
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
@@ -158,8 +163,8 @@ require('lazy').setup({
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("nvim-tree").setup {
-        filters = { dotfiles = true, git_ignored = false },
-        view = { adaptive_size = true, relativenumber = true },
+        filters = { dotfiles = false, git_ignored = false },
+        view = { adaptive_size = true},
         update_focused_file = { enable = true },
       }
     end,
@@ -176,7 +181,7 @@ require('lazy').setup({
         changedelete = { text = '~' },
         untracked    = { text = '┆' },
       },
-      signcolumn = false,
+      signcolumn = true,
       numhl = true,
       linehl = false,
       word_diff = false,
@@ -212,8 +217,10 @@ require('lazy').setup({
           return '<Ignore>'
         end, { expr = true, desc = 'Jump to previous hunk' })
 
-        map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'stage git hunk' })
-        map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'reset git hunk' })
+        map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end,
+          { desc = 'stage git hunk' })
+        map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end,
+          { desc = 'reset git hunk' })
         map('n', '<leader>hs', gs.stage_hunk, { desc = 'git stage hunk' })
         map('n', '<leader>hr', gs.reset_hunk, { desc = 'git reset hunk' })
         map('n', '<leader>hS', gs.stage_buffer, { desc = 'git Stage buffer' })
@@ -231,7 +238,7 @@ require('lazy').setup({
       end,
     },
   },
-  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  { "catppuccin/nvim",      name = "catppuccin", priority = 1000 },
   {
     'rmagatti/auto-session',
     config = function()
@@ -310,7 +317,8 @@ require('lualine').setup {
 }
 
 -- Configure Toggleterm
-require 'toggleterm-config'
+require 'kickstart.plugins.toggleterm-config'
+require 'kickstart.plugins.debug'
 
 -- Telescope Built-in Functions
 local builtin = require('telescope.builtin')
@@ -377,7 +385,7 @@ vim.o.breakindent = true
 vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
-vim.wo.signcolumn = 'no'
+vim.wo.signcolumn = 'yes'
 vim.o.updatetime = 50
 vim.o.timeoutlen = 300
 vim.o.completeopt = 'menuone,noselect'
@@ -459,58 +467,6 @@ vim.api.nvim_create_autocmd({ "BufEnter" }, {
   end,
 })
 
--- Telescope Configuration
-local js_based_languages = { "typescript", "javascript", "typescriptreact" }
-for _, language in ipairs(js_based_languages) do
-  require("dap").configurations[language] = {
-    {
-      type = "pwa-node",
-      request = "launch",
-      name = "Launch file",
-      program = "${file}",
-      cwd = "${workspaceFolder}",
-    },
-    {
-      type = "pwa-node",
-      request = "attach",
-      name = "NestJs",
-      program = "nodemon",
-      cwd = "${workspaceFolder}",
-    },
-    {
-      type = "pwa-node",
-      request = "attach",
-      name = "NestJs",
-      program = "npm run debug:dev",
-      cwd = "${workspaceFolder}",
-    },
-    {
-      type = "pwa-node",
-      request = "attach",
-      name = "Attach",
-      processId = require 'dap.utils'.pick_process,
-      cwd = "${workspaceFolder}",
-    },
-    {
-      type = "pwa-chrome",
-      request = "launch",
-      name = "Start Chrome with \"localhost\"",
-      url = "http://localhost:3000",
-      webRoot = "${workspaceFolder}",
-      userDataDir = "${workspaceFolder}/.vscode/vscode-chrome-debug-userdatadir"
-    }
-  }
-end
-
-require("dap-vscode-js").setup({
-  node_path = "node",
-  debugger_path = vim.fn.stdpath('data') .. "/lazy/vscode-js-debug",
-  debugger_cmd = { vim.fn.stdpath('data') .. "/lazy/vscode-js-debug/extension/dist/debug.js" },
-  adapters = { 'chrome', 'pwa-node', 'pwa-chrome', 'pwa-msedge', 'node-terminal', 'pwa-extensionHost', 'node' },
-  log_file_path = vim.fn.stdpath('data') .. "/dap_vscode_js.log",
-  log_file_level = 0,
-  log_console_level = vim.log.levels.INFO,
-})
 
 -- Scrollbar Handlers Configuration
 require("scrollbar.handlers.gitsigns").setup()
@@ -660,7 +616,8 @@ local on_attach = function(_, bufnr)
   end
 
   nmap('<leader>Rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', function() vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } } end, '[C]ode [A]ction')
+  nmap('<leader>ca', function() vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } } end,
+    '[C]ode [A]ction')
   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
   nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
@@ -671,7 +628,8 @@ local on_attach = function(_, bufnr)
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
   nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
   nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-  nmap('<leader>wl', function() print(vim.inspect(vim.lsp.buf.list_workspace_folders())) end, '[W]orkspace [L]ist Folders')
+  nmap('<leader>wl', function() print(vim.inspect(vim.lsp.buf.list_workspace_folders())) end,
+    '[W]orkspace [L]ist Folders')
 
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
