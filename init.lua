@@ -10,7 +10,7 @@ vim.keymap.set('n', '<C-w>|', '<cmd>WindowsMaximizeHorizontally<CR>')
 vim.keymap.set('n', '<C-w>=', '<cmd>WindowsEqualize<CR>')
 vim.keymap.set('n', ']q', '<cmd>cnext<CR>')
 vim.keymap.set('n', '[q', '<cmd>cprev<CR>')
-vim.keymap.set('n', '<leader>nb', ':%bd<CR><C-O>:bd#<CR>')
+vim.keymap.set('n', '<leader>nb', ':%bd<CR><C-O>:bd#<CR><CR>')
 
 -- vim.keymap.set("n", "L", "gt")
 -- vim.keymap.set("n", "H", "gT")
@@ -70,6 +70,23 @@ require('lazy').setup({
     },
   },
   { 'folke/todo-comments.nvim', event = 'VimEnter',    dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    {
+      'romgrk/barbar.nvim',
+      dependencies = {
+        'lewis6991/gitsigns.nvim',   -- OPTIONAL: for git status
+        'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
+      },
+      init = function() vim.g.barbar_auto_setup = false end,
+      opts = {
+        -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
+        -- animation = true,
+        -- insert_at_start = true,
+        -- …etc.
+      },
+      version = '^1.0.0', -- optional: only update when a new 1.x version is released
+    },
+  },
   { 'windwp/nvim-autopairs',    event = 'InsertEnter', config = true },
   {
     'yetone/avante.nvim',
@@ -132,6 +149,7 @@ require('lazy').setup({
       require('mini.surround').setup()
     end,
   },
+  { 'NvChad/nvim-colorizer.lua' },
   {
     'kristijanhusak/vim-dadbod-ui',
     dependencies = {
@@ -671,11 +689,11 @@ vim.api.nvim_set_keymap('n', '<leader>nt', ':tabnew<CR>', { noremap = true, sile
 vim.api.nvim_set_keymap('n', '<leader>nh', ':nohlsearch<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '//', [[y/\V<C-R>=escape(@",'/\')<CR><CR>]], { noremap = true, silent = true })
 vim.api.nvim_set_hl(0, "TreesitterContextBottom", {
-    bg = "#302D41", -- Same as above for consistency
+  bg = "#302D41",   -- Same as above for consistency
 })
 vim.api.nvim_set_hl(0, "TreesitterContextLineNumberBottom", {
-    bg = "#302D41", -- Same as above for consistency
-    fg = "#6E6C7E"  -- Catppuccin overlay0 color
+  bg = "#302D41",   -- Same as above for consistency
+  fg = "#6E6C7E"    -- Catppuccin overlay0 color
 })
 -- Conform Format
 vim.api.nvim_create_user_command('Format', function(args)
@@ -1041,6 +1059,10 @@ lspconfig.ts_ls.setup {
       vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
     end,
   },
+}
+
+require 'colorizer'.setup {
+  '*', -- Apply to all filetypes
 }
 
 -- Configure nvim-cmp
